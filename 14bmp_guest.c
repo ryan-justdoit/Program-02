@@ -50,14 +50,14 @@ void display()
 		// 3，获取LCD设备的硬件参数（分辨率、色深……）
 		bzero(&vsinfo, sizeof(vsinfo));
 		ioctl(lcd, FBIOGET_VSCREENINFO, &vsinfo); // 将LCD设备参数信息放入vsinfo中
-
+                /*
 		printf("屏幕分辨率: %d × %d\n", vsinfo.xres, vsinfo.yres);
 		printf("像素点内部结构:\n");
 		printf("A偏移量:%d\n", vsinfo.transp.offset);
 		printf("R偏移量:%d\n", vsinfo.red.offset);
 		printf("G偏移量:%d\n", vsinfo.green.offset);
 		printf("B偏移量:%d\n", vsinfo.blue.offset);
-
+*/
 		// 4，映射内存
 		lcd_w = vsinfo.xres;
 		lcd_h = vsinfo.yres;

@@ -11,13 +11,13 @@
 #define STOP_END_TOUCH   ( x_diff<140 && y_diff<140 )
 #define STOP 2
 
-#define EXIT_BEGIN_TOUCH ( ((x_first>510) && (x_first<650)) && ((y_first>180) && (y_first<320)) )
-#define EXIT_END_TOUCH   ( x_diff<140 && y_diff<140 )
-#define EXIT 3
+#define EXITT_BEGIN_TOUCH ( ((x_first>510) && (x_first<650)) && ((y_first>180) && (y_first<320)) )
+#define EXITT_END_TOUCH   ( x_diff<140 && y_diff<140 )
+#define EXITT 3
 
-#define BACK_BEGIN_TOUCH ( ((x_first>0) && (x_first<100)) && ((y_first>0) && (y_first<100)) )
-#define BACK_END_TOUCH   ( x_diff<100 && y_diff<100 )
-#define BACK 4
+#define Prior_BEGIN_TOUCH ( ((x_first>0) && (x_first<100)) && ((y_first>0) && (y_first<100)) )
+#define Prior_END_TOUCH   ( x_diff<100 && y_diff<100 )
+#define Prior 4
 
 #define NEXT_BEGIN_TOUCH ( ((x_first>700) && (x_first<800)) && ((y_first>0) && (y_first<100)) )
 #define NEXT_END_TOUCH   ( x_diff<100 && y_diff< 100)
@@ -25,108 +25,167 @@
 
 
 int screen_op();
+int flag = 0;
+int option;
+char buf[100];
 
 
 int main(int argc, char **argv) // ./main xxx.bmp 100 50
 {
-        pid_t pid;
-        int flag = 0;
-        int option;
-
-        bool read_op = 1;
-        char buf[100];
-        bzero(buf,100);
 	// 1,显示背景
 	background(argc,argv);
 
         // 2,读取歌曲目录
         dlinklist head = NULL;
         head = catalogue(argc,argv);
-        dlinklist tmp = head->next;
+        dlinklist now = head->next;
 
 
 	// 3,判断屏幕动作
 	printf("等待屏幕操作...\n");
 	while(1)
         {
-                if(read_op == 1)
-                {
-                       option = screen_op();
-                }
+                option = screen_op();
 
-                if(option == PLAY)
+                switch(option)
                 {
-                        
-                        flag = PLAY;
-                        snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",head->next->name);
-                        system(buf);
+                        case PLAY :play(&now); break;
+                        case STOP :stop(&now); break;
+                        case EXITT:exitt(&now);break;
+                        case Prior:prior(&now,head);break;
+                        case NEXT :next(&now,head); break;
                 }
-                else if(option == STOP)
-                {
-                        if(flag == PLAY)
-                        {
-                              // 暂停
-                                flag = STOP;
-                                printf("正在暂停...\n");
-                                system("killall -STOP madplay &");
-                        }
-                        else if(flag == STOP)
-                        {
-                                // 恢复
-                                flag = PLAY;
-                                printf("正在恢复播放...\n");
-                                system("killall -CONT madplay &");
-                        }
-                        else
-                        {
-                                printf("请先开始播放!\n");
-                        }
-                }
-                else if( option == EXIT )
-                {
-                        //退出
-                        /*
-                        if(flag == NEXT)
-                        {
-                                system("killall -9 madplay &");
-                                option = PLAY;
-                                printf("退出这一首\n");
-                                continue;
-                        }
-                        */
-                        flag = EXIT;
-                        printf("正在退出...\n");
-                        system("killall -9 madplay &");
-                }
-                else if( option == NEXT )
-                {
-                        // 下一首
-                        flag = NEXT;
-                        dlinklist now = tmp->next;
-                        if( now != head )
-                        {
-                                bzero(buf,100);
-                                snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",now->name);
-                                system(buf);
-                                printf("buf =%s\n",buf);
+        }
+}
 
-                                tmp = now;
-                        }
-                        else
-                        {
-                                bzero(buf,100);
-                                snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",head->next->name);
-                                printf("第一首：%s\n",head->next->name);
-                                system(buf);
-                                printf("该列表播完，回到第一首!\n");
-                                printf("buf =%s\n",buf);
-                        }
+void play(dlinklist *now)
+{
+        if((flag == PLAY || flag == STOP) && option == PLAY)
+        {
+                printf("已经在播放中了...\n");
+        }
+        else
+        {
+                bzero(buf,100);
+                snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",(*now)->name);
+                system(buf);
+                flag = PLAY;
+                printf("执行 [%d]:PLAY 完毕!\n",flag);
+                printf("正在播放 %s\n",(*now)->name);
+        }
 
 
-                }
+
+}
+
+void stop(dlinklist *now)
+{
+        if(flag == PLAY)
+        {
+                printf("正在暂停...\n");
+                system("killall -STOP madplay &");
+                flag = STOP;
+                printf("执行 [%d]:STOP 完毕!\n",flag);
+                printf("暂停播放 %s\n",(*now)->name);
+        }
+        else if(flag == STOP)
+        {
+                printf("正在恢复播放...\n");
+                system("killall -CONT madplay &");
+                flag = PLAY;
+                printf("执行 [%d]:PLAY 完毕!\n",flag);
+                printf("正在播放 %s\n",(*now)->name);
+        }
+        else
+        {
+                printf("现在还不能暂停/播放!\n");
+                printf("请先播放一首歌~\n");
         }
 
 }
+
+void exitt(dlinklist *now)
+{
+        if(flag == PLAY)
+        {
+                printf("正在退出...\n");
+                system("killall madplay &");
+                flag = EXITT;
+                printf("执行 [%d]:EXITT 完毕!\n",flag);
+                printf("退出播放 %s\n",(*now)->name);
+        }
+        else if(flag == STOP)
+        {
+                stop(&(*now));
+                system("killall madplay &");
+                flag = EXITT;
+                printf("最终结果:退出完毕.\n");
+        }
+        else
+        {
+                printf("现在还不能退出!\n");
+                printf("请先播放一首歌~\n");
+        }
+
+}
+
+void next(dlinklist *now,dlinklist head)
+{
+        if((*now)->next == head)
+        {
+                printf("这已经是最后一首歌，无法再播放下一首!!!\n");
+        }
+        else
+        {
+                exitt(&(*now));
+                usleep(100*1000);
+                (*now) = (*now)->next;
+                printf("正在下一首 %s\n",(*now)->name);
+                flag = NEXT;
+                //(*now) = (*now)->next;
+                play(&(*now));
+                /*
+                bzero(buf,100);
+                snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",(*now)->name);
+                system(buf);
+                */
+
+               /* play(&(*now));
+                printf("执行 [%d]:Prior 完毕!\n",flag);
+                printf("正在播放 %s\n",(*now)->name);
+*/
+        }
+}
+
+void prior(dlinklist *now,dlinklist head)
+{
+        if((*now)->prev == head)
+        {
+                printf("这已经是第一首歌，无法再播放上一首!!!\n");
+        }
+        else
+        {
+                exitt(&(*now));
+                usleep(100*1000);
+                (*now) = (*now)->prev;
+                printf("正在上一首 %s\n",(*now)->name);
+                flag = Prior;
+                //(*now) = (*now)->prev;
+                play(&(*now));
+                /*
+                bzero(buf,100);
+                snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",(*now)->name);
+                system(buf);
+                */
+
+               /* play(&(*now));
+                printf("执行 [%d]:NEXT 完毕!\n",flag);
+                printf("正在播放 %s\n",(*now)->name);
+*/
+        }
+
+}
+
 
 dlinklist catalogue(int argc,char **argv)
 {
@@ -178,7 +237,7 @@ dlinklist catalogue(int argc,char **argv)
 
 
 
-                printf("head->next->name2 = %s\n",head->next->name);
+               // printf("head->next->name2 = %s\n",head->next->name);
 		// 获取当前文件的stat信息
 		bzero(&info, sizeof(info));
 		stat(ep->d_name, &info);
@@ -252,18 +311,18 @@ int screen_op()
 			{
 				if(buf.value > 0)
 				{
-					printf("手指按下了!\n");
+				//	printf("手指按下了!\n");
 					x_first = x_second;
 					y_first = y_second;
-					printf("第一次按下的坐标（%d,%d）\n",x_first,y_first);
+				//	printf("第一次按下的坐标（%d,%d）\n",x_first,y_first);
 				}
 				if(buf.value == 0)
 				{
-					printf("手指松开了!\n");
-					printf("松开时的坐标（%d,%d）\n",x_second,y_second);
+				//	printf("手指松开了!\n");
+				//	printf("松开时的坐标（%d,%d）\n",x_second,y_second);
 					x_diff = x_second - x_first;
 					y_diff = y_second - y_first;
-					printf("距离 x= %d,y= %d\n",x_diff,y_diff);
+				//	printf("距离 x= %d,y= %d\n",x_diff,y_diff);
 					if(PLAY_BEGIN_TOUCH)
 					{
 						if(PLAY_END_TOUCH)
@@ -280,12 +339,12 @@ int screen_op()
 							return STOP;
 						}
 					}
-					else if(EXIT_BEGIN_TOUCH)
+					else if(EXITT_BEGIN_TOUCH)
 					{
-						if(EXIT_END_TOUCH)
+						if(EXITT_END_TOUCH)
 						{
 							printf("退出!\n");
-							return EXIT;
+							return EXITT;
 						}
 					}
 					else if(NEXT_BEGIN_TOUCH)
@@ -296,12 +355,12 @@ int screen_op()
 							return NEXT;
 						}
 					}
-					else if(BACK_BEGIN_TOUCH)
+					else if(Prior_BEGIN_TOUCH)
 					{
-						if(BACK_END_TOUCH)
+						if(Prior_END_TOUCH)
 						{
 							printf("上一首!\n");
-							return BACK;
+							return Prior;
 						}
 					}
 					else

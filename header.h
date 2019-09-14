@@ -17,6 +17,12 @@ dlinklist init_list();
 dlinklist catalogue(int argc,char **argv);
 void background(int argc,char **argv);
 
+void play(dlinklist *now);
+void stop(dlinklist *now);
+void exitt(dlinklist *now);
+void prior(dlinklist *now,dlinklist head);
+void next(dlinklist *now,dlinklist head);
+
 
 static int lcd;
 static int lcd_w;

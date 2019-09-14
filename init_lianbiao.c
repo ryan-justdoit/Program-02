@@ -81,7 +81,7 @@ dlinklist init_lianbiao(char *name,dlinklist head)
 
 	show(head);
 
-        printf("head->next->name1 = %s\n",head->next->name);
+      //  printf("head->next->name1 = %s\n",head->next->name);
 
 
 	return head;
