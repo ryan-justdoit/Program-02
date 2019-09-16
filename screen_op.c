@@ -1,5 +1,6 @@
 #include "header.h"
 #include "common.h"
+
 int screen_op()
 {
 	int tp = open("/dev/input/event0",O_RDWR);

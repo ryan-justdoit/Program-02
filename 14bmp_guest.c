@@ -5,13 +5,13 @@
 #include "header.h"
 
 // 需要多次使用的变量，使用静态数据
-/*
+
 static int lcd;
 static int lcd_w, lcd_h, lcd_bpp;
 static struct fb_var_screeninfo  vsinfo;
 static char *lcdmem;
 static bool first = true;
-*/
+
 
 void display()
 {

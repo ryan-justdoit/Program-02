@@ -1,38 +1,49 @@
 #include "header.h"
 #include "common.h"
+
+int flag = 0;
+char buf[100];
 void play(dlinklist *now)
 {
-        if((flag_now == PLAY || flag_now == STOP) && option == PLAY)
+        if((flag == PLAY || flag == STOP) && option == PLAY)
         {
                 printf("已经在播放中了...\n");
         }
         else
         {
+                //printf("%d\n",__LINE__);
                 bzero(buf,100);
+                //printf("%d\n",__LINE__);
                 snprintf(buf,sizeof(buf),"madplay -a -10 '%s' &",(*now)->name);
+                //printf("%d\n",__LINE__);
                 system(buf);
-                flag_now = PLAY;
-                printf("执行 [%d]:PLAY 完毕!\n",flag_now);
+                //printf("%d\n",__LINE__);
+                flag = PLAY;
+                //printf("%d\n",__LINE__);
+                printf("执行 [%d]:PLAY 完毕!\n",flag);
+                //printf("%d\n",__LINE__);
                 printf("正在播放 %s\n",(*now)->name);
+                //printf("%d\n",__LINE__);
+                //printf("按时发布三分\n");
         }
 }
 
 void stop(dlinklist *now)
 {
-        if(flag_now == PLAY)
+        if(flag == PLAY)
         {
                 printf("正在暂停...\n");
                 system("killall -STOP madplay &");
-                flag_now = STOP;
-                printf("执行 [%d]:STOP 完毕!\n",flag_now);
+                flag = STOP;
+                printf("执行 [%d]:STOP 完毕!\n",flag);
                 printf("暂停播放 %s\n",(*now)->name);
         }
-        else if(flag_now == STOP)
+        else if(flag == STOP)
         {
                 printf("正在恢复播放...\n");
                 system("killall -CONT madplay &");
-                flag_now = PLAY;
-                printf("执行 [%d]:PLAY 完毕!\n",flag_now);
+                flag = PLAY;
+                printf("执行 [%d]:PLAY 完毕!\n",flag);
                 printf("正在播放 %s\n",(*now)->name);
         }
         else
@@ -45,19 +56,19 @@ void stop(dlinklist *now)
 
 void exitt(dlinklist *now)
 {
-        if(flag_now == PLAY)
+        if(flag == PLAY)
         {
                 printf("正在退出...\n");
                 system("killall madplay &");
-                flag_now = EXITT;
-                printf("执行 [%d]:EXITT 完毕!\n",flag_now);
+                flag = EXITT;
+                printf("执行 [%d]:EXITT 完毕!\n",flag);
                 printf("退出播放 %s\n",(*now)->name);
         }
-        else if(flag_now == STOP)
+        else if(flag == STOP)
         {
                 stop(&(*now));
                 system("killall madplay &");
-                flag_now = EXITT;
+                flag = EXITT;
                 printf("最终结果:退出完毕.\n");
         }
         else
@@ -80,7 +91,7 @@ void next(dlinklist *now,dlinklist head)
                 usleep(100*1000);
                 (*now) = (*now)->next;
                 printf("正在下一首 %s\n",(*now)->name);
-                flag_now = NEXT;
+                flag = NEXT;
                 //(*now) = (*now)->next;
                 play(&(*now));
         }
@@ -98,7 +109,7 @@ void prior(dlinklist *now,dlinklist head)
                 usleep(100*1000);
                 (*now) = (*now)->prev;
                 printf("正在上一首 %s\n",(*now)->name);
-                flag_now = Prior;
+                flag = Prior;
                 //(*now) = (*now)->prev;
                 play(&(*now));
         }

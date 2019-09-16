@@ -4,9 +4,6 @@
  *
  */
 
-
-
-
 #include "common.h"
 
 #include "header.h"
